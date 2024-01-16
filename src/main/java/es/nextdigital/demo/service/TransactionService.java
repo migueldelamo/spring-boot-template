@@ -1,10 +1,12 @@
 @Service
 public class TransactionService {
     private final TransactionRepository repository;
+    private final TransactionRepository transactionRepository;
 
     @Autowired
-    public TransactionService(TransactionRepository repository) {
-        this.repository = repository;
+    public BankTransactionService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public List<Transaction> getAllTransactions() {
@@ -33,6 +35,37 @@ public class TransactionService {
         }
     }
 
+
+    public void makeTransfer(Long sourceAccountId, String destinationAccountNumber, BigDecimal amount) {
+        Account sourceAccount = accountRepository.findById(sourceAccountId)
+                .orElseThrow(() -> new AccountNotFoundException("Source account not found."));
+        Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber)
+                .orElseThrow(() -> new AccountNotFoundException("Destination account not found."));
+
+        if (sourceAccount.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientFundsException("Insuficient money.");
+        }
+
+        BigDecimal commission = 0;
+        if (!sourceAccount.getBank().equals(destinationAccount.getBank())) {
+            commission = 10; // TODO: calcular comisión
+        }
+
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount).subtract(commission));
+        destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+
+        recordTransaction(sourceAccount, amount.negate(), BankTransaction.TransactionType.OUTGOING_TRANSFER);
+        if (commission > 0) {
+            recordTransaction(sourceAccount, , BankTransaction.TransactionType.FEE);
+        }
+        recordTransaction(destinationAccount, amount, BankTransaction.TransactionType.INCOMING_TRANSFER);
+
+        accountRepository.save(sourceAccount);
+        accountRepository.save(destinationAccount);
+    }
+
+
+
     private boolean isDifferent(Atm atm, Card card) {
         return !atm.getBankName().equals(card.getAccount().get().getBankName());
     }
@@ -46,7 +79,7 @@ public class TransactionService {
             throw new DifferentBankException("The card doesn't belong to the bank");
         }
 
-        BankAccount account = card.getAccount();
+        Account account = card.getAccount();
         account.setBalance(account.getBalance().add(amount));
 
         recordTransaction(account, amount, BankTransaction.TransactionType.DEPOSIT);
@@ -59,7 +92,5 @@ public class TransactionService {
         transaction.setDate(LocalDate.now());
         transaction.setType(type);
     }
-
-    
 
 }
