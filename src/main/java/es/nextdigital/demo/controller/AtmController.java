@@ -22,6 +22,9 @@ public class AtmController {
     public ResponseEntity<?> withdrawMoney(@RequestParam Long cardId, @RequestParam Long atmId, @RequestParam BigDecimal amount) {
         try {
             Card card = cardService.getCardById(cardId);
+            if(!card.getIsActive()){
+                throw new DifferentBankException("The card doesn't belong to the bank");
+            }
             Atm atm = atmService.getAtmById(atmId);
             transactionService.withdrawMoney(card, atm, amount);
             return ResponseEntity.ok().body("Withdray successful.");
@@ -40,6 +43,9 @@ public class AtmController {
     public ResponseEntity<?> depositMoney(@RequestParam Long cardId, @RequestParam Long atmId, @RequestParam BigDecimal amount) {
         try {
             Card card = cardService.getCardById(cardId); 
+            if(!card.getIsActive()){
+                throw new DifferentBankException("The card doesn't belong to the bank");
+            }
             Atm atm = atmService.getAtmById(atmId); 
             bankTransactionService.depositMoney(card, atm, amount);
             return ResponseEntity.ok().body("Ingreso exitoso.");

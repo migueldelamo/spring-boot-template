@@ -14,8 +14,11 @@ public class TransactionService {
     }
 
     public void withdrawMoney(Card card, Atm atm, BigDecimal amount) {
+        if(!card.getIsActive()){
+            throw new DifferentBankException("The card doesn't belong to the bank");
+        }
         if (card.getType() == CardType.DEBIT && card.getAccount().getBalance().compareTo(amount) < 0) {
-            throw new InsufficientFundsException();
+            throw new InactiveCardException();
         } else if (card.getType() == CardType.CREDIT && card.getAccount().getCreditLimit().add(card.getAccount().getBalance()).compareTo(amount) < 0) {
             throw new CreditLimitExceededException();
         }
@@ -64,17 +67,10 @@ public class TransactionService {
         accountRepository.save(destinationAccount);
     }
 
-
-
-    private boolean isDifferent(Atm atm, Card card) {
-        return !atm.getBankName().equals(card.getAccount().get().getBankName());
-    }
-    
-    private void updateAccountBalance(Account account, BigDecimal amount) {
-        account.setBalance(account.getBalance().add(amount));
-    }
-    
     public void depositMoney(Card card, Atm atm, BigDecimal amount) {
+        if(!card.getIsActive()){
+            throw new DifferentBankException("The card doesn't belong to the bank");
+        }
         if (!card.getAccount().getBank().equals(atm.getBankName())) {
             throw new DifferentBankException("The card doesn't belong to the bank");
         }
@@ -83,6 +79,14 @@ public class TransactionService {
         account.setBalance(account.getBalance().add(amount));
 
         recordTransaction(account, amount, BankTransaction.TransactionType.DEPOSIT);
+    }
+
+    private boolean isDifferent(Atm atm, Card card) {
+        return !atm.getBankName().equals(card.getAccount().get().getBankName());
+    }
+    
+    private void updateAccountBalance(Account account, BigDecimal amount) {
+        account.setBalance(account.getBalance().add(amount));
     }
 
     private void recordTransaction(Account account, BigDecimal amount, TransactionType type) {

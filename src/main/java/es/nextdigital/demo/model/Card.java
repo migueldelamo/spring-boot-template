@@ -5,6 +5,7 @@ public class Card {
     private Account account;
     private CardType type;
     private BigDecimal withdrawalLimit; 
+    private boolean isActive;
 
 
     public Card() {
@@ -33,6 +34,10 @@ public class Card {
         return withdrawalLimit;
     }
 
+    public CardType getIsActive() {
+        return isActive;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -47,6 +52,10 @@ public class Card {
 
     public void setWithdrawalLimit(BigDecimal withdrawalLimit) {
         this.withdrawalLimit = withdrawalLimit;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public enum CardType {
