@@ -41,6 +41,17 @@ public class TransactionService {
         account.setBalance(account.getBalance().add(amount));
     }
     
+    public void depositMoney(Card card, Atm atm, BigDecimal amount) {
+        if (!card.getAccount().getBank().equals(atm.getBankName())) {
+            throw new DifferentBankException("The card doesn't belong to the bank");
+        }
+
+        BankAccount account = card.getAccount();
+        account.setBalance(account.getBalance().add(amount));
+
+        recordTransaction(account, amount, BankTransaction.TransactionType.DEPOSIT);
+    }
+
     private void recordTransaction(Account account, BigDecimal amount, TransactionType type) {
         Transaction transaction = new Transaction();
         transaction.setAccount(account);
@@ -48,4 +59,7 @@ public class TransactionService {
         transaction.setDate(LocalDate.now());
         transaction.setType(type);
     }
+
+    
+
 }

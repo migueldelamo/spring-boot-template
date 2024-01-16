@@ -3,6 +3,7 @@ public class Account {
     private String accountNumber;
     private BigDecimal balance;
     private BigDecimal creditLimit;
+    private Bank bank;
 
     public Account() {}
 
@@ -29,6 +30,10 @@ public class Account {
         return creditLimit;
     }
 
+    public Bank getBank() {
+        return bank;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -43,6 +48,10 @@ public class Account {
 
     public void setCreditLimit(BigDecimal creditLimit) {
         this.creditLimit = creditLimit;
+    }
+
+    public void setBank(Bank bank) {
+        this.bank = bank;
     }
 
 }

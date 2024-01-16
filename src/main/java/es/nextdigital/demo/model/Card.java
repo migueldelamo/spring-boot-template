@@ -6,6 +6,7 @@ public class Card {
     private CardType type;
     private BigDecimal withdrawalLimit; 
 
+
     public Card() {
     }
 

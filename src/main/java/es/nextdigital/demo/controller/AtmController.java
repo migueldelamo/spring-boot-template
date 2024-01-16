@@ -35,4 +35,18 @@ public class AtmController {
             return ResponseEntity.internalServerError().body("An error occurred while withdrawing the money.");
         }
     }
+
+    @PostMapping("/deposit")
+    public ResponseEntity<?> depositMoney(@RequestParam Long cardId, @RequestParam Long atmId, @RequestParam BigDecimal amount) {
+        try {
+            Card card = cardService.getCardById(cardId); 
+            Atm atm = atmService.getAtmById(atmId); 
+            bankTransactionService.depositMoney(card, atm, amount);
+            return ResponseEntity.ok().body("Ingreso exitoso.");
+        } catch (DifferentBankException e) {
+            return ResponseEntity.badRequest().body("El cajero no pertenece al mismo banco que la tarjeta.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error en el proceso de ingreso.");
+        }
+    }
 }
